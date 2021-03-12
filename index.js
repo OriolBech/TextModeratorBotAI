@@ -1,27 +1,10 @@
 require('dotenv').config();
-const fetch = require('node-fetch');
+let fetch = require('node-fetch');
 
-var Discord = require('discord.js');
-var bot = new Discord.Client();
-var TOKEN = process.env.TOKEN;
-var KEY = process.env.KEY;
-
-
-
-//post options
-const options = {
-  hostname: 'https://westeurope.api.cognitive.microsoft.com/contentmoderator/moderate/v1.0/ProcessText/Screen?classify=True',
-  method: 'POST',
-  headers: {
-      'content-type': 'text/plain',
-      'Ocp-Apim-Subscription-Key': 'c0ac983e40904019ac97de57dde4a6a9'
-  }
-  ,
-  params: {
-    'classify':'True'
-  }
-};
-
+let Discord = require('discord.js');
+let bot = new Discord.Client();
+const TOKEN = process.env.TOKEN;
+const KEY = process.env.KEY;
 
 //bot login
 bot.login(TOKEN);
@@ -31,22 +14,22 @@ bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
 });
 
-async function getReview() {
-
-}
-
 //scan messages from discord
 bot.on("message", msg => {
-  var review;
   //send json data
-  async function getReview() {
-    var response = await fetch('https://westeurope.api.cognitive.microsoft.com/contentmoderator/moderate/v1.0/ProcessText/Screen?classify=True', { 
+  let getReview = function(data) {
+    return fetch('https://westeurope.api.cognitive.microsoft.com/contentmoderator/moderate/v1.0/ProcessText/Screen?classify=True', { 
       method: 'post',
-      body:    msg,
+      body:    data,
       headers: { 'Content-Type': 'text/plain', 'Ocp-Apim-Subscription-Key': KEY },
-    }).then(res => res.json()).then(body => this.review = body['Classification']['ReviewRecommended']);
-    return response;
+    }).then(body => { return body.json() } )
   }
-  review = getReview();
-  console.log(review);
+  
+  let checkReview = getReview(msg);
+  
+  checkReview.then(function(result) {
+    if (result['Classification']['ReviewRecommended'] == true) {
+      msg.delete().then(msg => msg.reply(`Deleted message by ModeratorBot, possibly for be offensive`))
+    }
+  })
 });
