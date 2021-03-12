@@ -28,8 +28,10 @@ bot.on("message", msg => {
   let checkReview = getReview(msg);
   
   checkReview.then(function(result) {
-    if (result['Classification']['ReviewRecommended'] == true) {
-      msg.delete().then(msg => msg.reply(`Deleted message by ModeratorBot, possibly for be offensive`))
+    if(result.hasOwnProperty('Classification')){
+      if (result['Classification']['ReviewRecommended'] == true) {
+        msg.delete().then(msg => msg.reply(`Deleted message by ModeratorBot, possibly for be offensive`))
+      }
     }
   })
 });
